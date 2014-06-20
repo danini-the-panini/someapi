@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Daniel Smith"]
   spec.email         = ["jellymann@gmail.com"]
   spec.summary       = %q{A generic RESTful API wrapper.}
-  #spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.description   = %q{Built around HTTParty, SomeAPI provides a generic wrapper for your favourite RESTful WebAPI. Simply extend Some::API and apply your usual HTTParty options like base_uri, then call your new API and party harder!}
   spec.homepage      = "https://github.com/jellymann/someapi"
   spec.license       = "MIT"
 
