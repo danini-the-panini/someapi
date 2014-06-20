@@ -2,7 +2,7 @@
 
 Built around HTTParty, SomeAPI provides a generic wrapper for your favourite RESTful WebAPI. Simply extend Some::API and apply your usual HTTParty options like base_uri, then call your new API and party harder!
 
-## Installation
+## Get Some
 
 Add this line to your application's Gemfile:
 
@@ -59,13 +59,13 @@ Stubs look exactly the same as their corresponding requests except for the prese
 
 ## Tips and Gotchas
 
-If your request ends in a `[someth]` remember to put a dot before the bang, as in the examples. Ruby doesn't define the (very odd and mostly useless actually) operator for `[]!`.
+If your request ends in a `[whatever]` remember to put a dot before the bang, as in the examples. Ruby doesn't define the (very odd and mostly useless actually) operator for `[]!`.
 
 Posting hashes can be done more succinctly by using the `<<` operator, as follows (using the post example from above):
 
     github.post.repos[@username][@repo].pulls << { title: "Foo", body: "Pull my Foo", ... }
 
-Also note that every time you do this (put the bang at the beginning of a request):
+Also note that every time you do the following (ie. put the bang at the beginning of a request):
 
     !github.get.users[@some_user]
 
