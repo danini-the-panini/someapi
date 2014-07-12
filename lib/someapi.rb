@@ -107,17 +107,17 @@ module Some
 
       def merge_headers options
         options.merge({
-          headers: self.class.headers.to_h.merge(
-            @options[:headers].to_h.merge(
-              options[:headers].to_h))
+          headers: (self.class.headers || {}).
+            merge((@options[:headers] || {}).
+            merge(options[:headers] || {}))
         })
       end
 
       def merge_queries options
         options.merge({
-          query: self.class.default_options[:default_params].to_h.merge(
-            @options[:query].to_h.merge(
-              options[:query].to_h))
+          query: (self.class.default_options[:default_params] || {}).
+            merge((@options[:query] || {}).
+            merge(options[:query]|| {}))
         })
       end
 
