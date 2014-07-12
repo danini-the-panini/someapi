@@ -9,23 +9,26 @@ module Some
 
     API_REGEX = /^[a-zA-Z0-9_]+[!]?$/
 
-    def initialize options={}, meth=nil, path=nil, stubbed=false
-      @meth = meth
-      @path = path
-      @options = options
+    def initialize options={}
+      @method = options[:method]
+      @path = options[:path]
 
       # stubbed is a flag set when you're stubbing the API call
       # used in testing
       # just call 'stub' in the call chain before the http_method method
-      @stubbed = stubbed
+      @stubbed = options[:stubbed]
+
+      @options = options.delete_if do |k|
+        %w(method path stubbed).include? k
+      end
     end
 
     # http_method methods
     # used in the call chain to set the http method
     %W(get post put patch delete copy move head options).each do |meth|
       define_method(meth) do
-        unless @meth
-          self.class.new Hash.new, meth.to_s, nil, @stubbed
+        unless @method
+          make_new method: meth.to_s, stubbed: @stubbed
         else
           self[meth]
         end
@@ -35,8 +38,8 @@ module Some
     # use in the call chain to flag this request as a stub
     # used in testing for setting up API-call stubs
     def stub
-      unless @meth
-        self.class.new Hash.new, @meth, @path, true
+      unless @method
+        make_new method: @method, path: @path, stubbed: true
       else
         self['stub']
       end
@@ -57,8 +60,9 @@ module Some
     # 'calls' the API request
     # (or makes the stub, if stubbed)
     def ! options = {}
+      puts "MAKING A THING!!! #{self.inspect}"
       unless @stubbed
-        self.class.send(@meth, @path || '/', deep_merge(options,@options))
+        self.class.send(@method, @path || '/', deep_merge(options,@options))
       else
         uri = "#{self.class.base_uri}#{@path}"
 
@@ -68,35 +72,37 @@ module Some
         options = self.class.default_options.
           merge(@options.merge(options))
 
-        stub_request(@meth.to_sym, uri.to_s).with(options)
+        stub_request(@method.to_sym, uri.to_s).with(options)
       end
     end
 
     # chains 'thing' onto URL path
     def [] thing
-      self.class.new @options, @meth, "#{@path || ''}/#{thing}", @stubbed
+      make_new method: @method,
+               path: "#{@path || ''}/#{thing}",
+               stubbed: @stubbed
     end
 
     # this is where the fun begins...
     def method_missing meth, *args, &block
-      meths = meth.to_s
-      if @meth && meths =~ API_REGEX
+      meth_s = meth.to_s
+      if @method && meth_s =~ API_REGEX
 
-        if meths.end_with?('!')
+        if meth_s.end_with?('!')
           # `foo! bar' is syntactic sugar for `foo.! bar'
-          self[meths[0...-1]].!(args[0] || {})
+          self[meth_s[0...-1]].!(args[0] || {})
 
         else
           # chain the method name onto URL path
-          self[meths]
+          self[meth_s]
         end
       else
         super
       end
     end
 
-    def respond_to_missing? meth
-      @meth && meth.to_s =~ API_REGEX
+    def respond_to_missing? method
+      @method && method.to_s =~ API_REGEX
     end
 
     private
@@ -128,6 +134,10 @@ module Some
         merge_stuff(a,b,:headers)
         merge_stuff(a,b,:query)
         b.merge(a)
+      end
+
+      def make_new opts={}
+        self.class.new @options.merge(opts)
       end
 
   end
