@@ -1,4 +1,6 @@
 # SomeAPI
+[![Build Status](https://travis-ci.org/jellymann/someapi.svg?branch=master)](https://travis-ci.org/jellymann/someapi)
+[![Code Climate](https://codeclimate.com/github/jellymann/someapi.png)](https://codeclimate.com/github/jellymann/someapi)
 
 Built around HTTParty, SomeAPI provides a generic wrapper for your favourite RESTful WebAPI. Simply extend Some::API and apply your usual HTTParty options like base_uri, then call your new API and party harder!
 
