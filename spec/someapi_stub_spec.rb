@@ -10,7 +10,7 @@ describe 'Some::API stubs' do
 
   let(:api) { TestAPI.new }
 
-  it 'stubs endpoints with method_missing' do
+  it 'stubs endpoints using method_missing' do
     stub = api.stub.get.foo.bar!
     stub2 = api.stub.get.foo.bar.!
 
@@ -21,7 +21,7 @@ describe 'Some::API stubs' do
     expect(stub2).to have_been_requested
   end
 
-  it 'stubs endpoints with subscript operator' do
+  it 'stubs endpoints using subscript operator' do
     stub = api.stub.get['foo']['bar'].!
 
     HTTParty.get('http://example.com/foo/bar?foo=bar',

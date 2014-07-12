@@ -8,7 +8,7 @@ describe Some::API do
 
   let(:api) { TestAPI.new }
 
-  it 'requests endpoints with method_missing' do
+  it 'requests endpoints using method_missing' do
     stub = stub_request(:get, "http://example.com/foo/bar?foo=bar").
       with(:headers => test_headers)
 
@@ -18,7 +18,7 @@ describe Some::API do
     expect(stub).to have_been_requested.times(2)
   end
 
-  it 'requests endpoints with subscript operator' do
+  it 'requests endpoints using subscript operator' do
     stub = stub_request(:get, "http://example.com/foo/bar?foo=bar").
       with(:headers => test_headers)
 
