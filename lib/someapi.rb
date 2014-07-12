@@ -19,7 +19,7 @@ module Some
       @stubbed = options[:stubbed]
 
       @options = options.delete_if do |k|
-        %w(method path stubbed).include? k
+        [:method, :path, :stubbed].include? k
       end
     end
 
@@ -60,19 +60,13 @@ module Some
     # 'calls' the API request
     # (or makes the stub, if stubbed)
     def ! options = {}
-      puts "MAKING A THING!!! #{self.inspect}"
+      merged_options = merge_headers_and_queries options
       unless @stubbed
-        self.class.send(@method, @path || '/', deep_merge(options,@options))
+        self.class.send(@method, @path || '/', merged_options)
       else
         uri = "#{self.class.base_uri}#{@path}"
 
-        deep_merge(options,@options)
-        process_headers(options)
-        process_query(options)
-        options = self.class.default_options.
-          merge(@options.merge(options))
-
-        stub_request(@method.to_sym, uri.to_s).with(options)
+        stub_request(@method.to_sym, uri.to_s).with merged_options
       end
     end
 
@@ -107,33 +101,24 @@ module Some
 
     private
 
-      # shamelessly stolen from HTTParty
-      def process_headers(options)
-        if options[:headers] && self.class.headers.any?
-          options[:headers] = self.class.headers.merge(options[:headers])
-        end
+      def merge_headers_and_queries options
+        merge_headers merge_queries options
       end
 
-      # shamelessly copied from above, but for :query
-      def process_query(options)
-        if self.class.default_options[:default_params]
-          options[:query] = self.class.default_options[:default_params].
-            merge(options[:query] || {})
-        end
+      def merge_headers options
+        options.merge({
+          headers: self.class.headers.to_h.merge(
+            @options[:headers].to_h.merge(
+              options[:headers].to_h))
+        })
       end
 
-      # merge a hash within a hash from two hashes (yo-dawg...)
-      def merge_stuff(a,b,tag)
-        if a[tag] && b[tag]
-          a[tag] = b[tag].merge(a[tag])
-        end
-      end
-
-      # just merge_stuff like :headers and :query... you know, HTTP stuff
-      def deep_merge(a,b)
-        merge_stuff(a,b,:headers)
-        merge_stuff(a,b,:query)
-        b.merge(a)
+      def merge_queries options
+        options.merge({
+          query: self.class.default_options[:default_params].to_h.merge(
+            @options[:query].to_h.merge(
+              options[:query].to_h))
+        })
       end
 
       def make_new opts={}
