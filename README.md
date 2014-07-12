@@ -50,6 +50,10 @@ Don't stub your toe on external services!
 
         Some::API.include WebMock::API
 
+     NOTE: If you're using Ruby version before 2.1.x, then you'll have to include WebMock like this:
+
+        Some::API.send :include, WebMock::API
+
   3. Adding `stub` before the HTTP method in a SomeAPI request will instead return a Webmock stub after the bang.
 
         github = Github.new
@@ -67,7 +71,7 @@ Posting hashes can be done more succinctly by using the `<<` operator, as follow
 
     github.post.repos[@username][@repo].pulls << { title: "Foo", body: "Pull my Foo", ... }
 
-Also note that every time you do the following (ie. put the bang at the beginning of a request):
+CAUTION: Every time you do the following (ie. put the bang at the beginning of a request):
 
     !github.get.users[@some_user]
 
