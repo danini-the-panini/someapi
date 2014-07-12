@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-Some::API.include WebMock::API
+Some::API.send :include, WebMock::API
 
 describe 'Some::API stubs' do
 
