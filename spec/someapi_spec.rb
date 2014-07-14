@@ -11,53 +11,157 @@ describe Some::API do
   let(:even_moar_headers) { { 'X-Baz' => 'Qux' } }
   let(:even_moar_params) { { 'baz' => 'qux' } }
 
-  let(:api) { TestAPI.new query: moar_params,
-                          headers: moar_headers }
+  context 'when api has not defaults' do
+    context 'when api has no extras' do
+      let(:api) { NoAPI.new }
 
-  it 'requests endpoints using method_missing' do
-    stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz&foo=bar").
-      with(:headers => all_the_headers)
+      it 'requests endpoints using method_missing' do
+        stub = stub_request(:get, "http://example.com/foo/bar")
 
-    api.get.foo.bar!
-    api.get.foo.bar.!
+        api.get.foo.bar!
+        api.get.foo.bar.!
 
-    expect(stub).to have_been_requested.times(2)
+        expect(stub).to have_been_requested.times(2)
+      end
+
+      it 'requests endpoints using subscript operator' do
+        stub = stub_request(:get, "http://example.com/foo/bar")
+
+        api.get['foo']['bar'].!
+
+        expect(stub).to have_been_requested
+      end
+
+
+      it 'requests endpoints with query' do
+        stub = stub_request(:get, "http://example.com/foo/bar?baz=qux")
+
+        api.get.foo.bar! query: even_moar_params
+
+        expect(stub).to have_been_requested
+      end
+
+      it 'requests endpoints with headers' do
+        stub = stub_request(:get, "http://example.com/foo/bar").
+          with(:headers => even_moar_headers)
+
+        api.get.foo.bar! headers: even_moar_headers
+
+        expect(stub).to have_been_requested
+      end
+
+      it 'requests endpoints with body' do
+        stub = stub_request(:post, "http://example.com/foo/bar").
+          with(:body => test_body)
+
+        api.post.foo.bar! body: test_body
+
+        expect(stub).to have_been_requested
+      end
+    end
+
+    context 'when api has extra headers and queries' do
+      let(:api) { NoAPI.new query: moar_params,
+                              headers: moar_headers }
+
+      it 'requests endpoints' do
+        stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz").
+          with(:headers => moar_headers)
+
+        api.get.foo.bar!
+        api.get.foo.bar.!
+
+        expect(stub).to have_been_requested.times(2)
+      end
+
+      it 'requests endpoints with query' do
+        stub = stub_request(:get, "http://example.com/foo/bar?baz=qux&fizz=buzz").
+          with(:headers => moar_headers)
+
+        api.get.foo.bar! query: even_moar_params
+
+        expect(stub).to have_been_requested
+      end
+
+      it 'requests endpoints with headers' do
+        stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz").
+          with(:headers => moar_headers.merge(even_moar_headers))
+
+        api.get.foo.bar! headers: even_moar_headers
+
+        expect(stub).to have_been_requested
+      end
+
+    end
   end
 
-  it 'requests endpoints using subscript operator' do
-    stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz&foo=bar").
-      with(:headers => all_the_headers)
+  context 'when api has default headers and queries' do
+    context 'when api has extra headers and queries' do
+      let(:api) { AllAPI.new query: moar_params,
+                              headers: moar_headers }
 
-    api.get['foo']['bar'].!
+      it 'requests endpoints' do
+        stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz&foo=bar").
+          with(:headers => all_the_headers)
 
-    expect(stub).to have_been_requested
-  end
+        api.get.foo.bar!
+        api.get.foo.bar.!
+
+        expect(stub).to have_been_requested.times(2)
+      end
+
+      it 'requests endpoints with query' do
+        stub = stub_request(:get, "http://example.com/foo/bar?baz=qux&fizz=buzz&foo=bar").
+          with(:headers => all_the_headers)
+
+        api.get.foo.bar! query: even_moar_params
+
+        expect(stub).to have_been_requested
+      end
+
+      it 'requests endpoints with headers' do
+        stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz&foo=bar").
+          with(:headers => all_the_headers.merge(even_moar_headers))
+
+        api.get.foo.bar! headers: even_moar_headers
+
+        expect(stub).to have_been_requested
+      end
+
+    end
 
 
-  it 'requests endpoints with query' do
-    stub = stub_request(:get, "http://example.com/foo/bar?baz=qux&fizz=buzz&foo=bar").
-      with(:headers => all_the_headers)
+    context 'when api has no extras' do
+      let(:api) { AllAPI.new }
 
-    api.get.foo.bar! query: even_moar_params
+      it 'requests endpoints' do
+        stub = stub_request(:get, "http://example.com/foo/bar?foo=bar").
+          with(:headers => test_headers)
 
-    expect(stub).to have_been_requested
-  end
+        api.get.foo.bar!
+        api.get.foo.bar.!
 
-  it 'requests endpoints with headers' do
-    stub = stub_request(:get, "http://example.com/foo/bar?fizz=buzz&foo=bar").
-      with(:headers => all_the_headers.merge(even_moar_headers))
+        expect(stub).to have_been_requested.times(2)
+      end
 
-    api.get.foo.bar! headers: even_moar_headers
+      it 'requests endpoints with query' do
+        stub = stub_request(:get, "http://example.com/foo/bar?baz=qux&foo=bar").
+          with(:headers => test_headers)
 
-    expect(stub).to have_been_requested
-  end
+        api.get.foo.bar! query: even_moar_params
 
-  it 'requests endpoints with body' do
-    stub = stub_request(:post, "http://example.com/foo/bar?fizz=buzz&foo=bar").
-      with(:headers => all_the_headers, :body => test_body)
+        expect(stub).to have_been_requested
+      end
 
-    api.post.foo.bar! body: test_body
+      it 'requests endpoints with headers' do
+        stub = stub_request(:get, "http://example.com/foo/bar?foo=bar").
+          with(:headers => test_headers.merge(even_moar_headers))
 
-    expect(stub).to have_been_requested
+        api.get.foo.bar! headers: even_moar_headers
+
+        expect(stub).to have_been_requested
+      end
+
+    end
   end
 end
